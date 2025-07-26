@@ -3,15 +3,19 @@ name: Deploy static site to build branch
 on:
   push:
     branches:
-      - main # The branch name your are commit the new changes
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     name: Build and Push
+    permissions:
+      contents: write
     steps:
-      - name: git-checkout
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Copy files to build directory
         run: |
@@ -20,11 +24,10 @@ jobs:
           cp *.css build/
           cp -r assets build/ 2>/dev/null || true
 
-      - name: Push
-        uses: s0/git-publish-subdir-action@develop
-        env:
-          REPO: self
-          BRANCH: build # The branch name where you want to push the assets
-          FOLDER: build # The directory where your assets are generated
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
-          MESSAGE: "Build: ({sha}) {msg}" # The commit message
+      - name: Deploy to build branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          publish_branch: build
+          commit_message: "Build: ${{ github.sha }}"
