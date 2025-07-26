@@ -22,6 +22,7 @@ jobs:
           mkdir -p build
           cp *.html build/
           cp *.css build/
+          cp .htaccess build/ 2>/dev/null || true
           cp -r assets build/ 2>/dev/null || true
 
       - name: Deploy to build branch
